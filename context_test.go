@@ -52,6 +52,7 @@ func CreateCounter(ctx context.Context) <-chan int {
 			default:
 				destination <- counter
 				counter++
+				time.Sleep(time.Second)
 			}
 		}
 	}()
@@ -76,6 +77,21 @@ func TestContextWithCancel(t *testing.T) {
 	cancel()
 
 	time.Sleep(2 * time.Second)
+
+	fmt.Println("Total Goroutine ", runtime.NumGoroutine())
+}
+
+func TestContextWithTimeout(t *testing.T) {
+	fmt.Println("Total Goroutine ", runtime.NumGoroutine())
+	parent := context.Background()
+	ctx, cancel := context.WithTimeout(parent, 4*time.Second)
+	defer cancel()
+
+	destinations := CreateCounter(ctx)
+	fmt.Println("Total Goroutine ", runtime.NumGoroutine())
+	for destination := range destinations {
+		fmt.Println("Counter ", destination)
+	}
 
 	fmt.Println("Total Goroutine ", runtime.NumGoroutine())
 }
